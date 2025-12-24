@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>高雪梅的平安夜圣诞树</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        * { margin: 0; padding: 0; }
+        body { overflow: hidden; background: linear-gradient(#0a0a1a, #1a1a3a); }
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-family: "Arial Rounded MT Bold", "Microsoft YaHei", sans-serif;
+            font-size: 22px;
+            text-shadow: 0 0 10px #ffd700;
+            white-space: nowrap;
+        }
+        .blessing {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 17px;
+            font-family: "Microsoft YaHei", sans-serif;
+            text-align: center;
+            line-height: 1.8;
+            text-shadow: 0 0 8px rgba(255,215,0,0.5);
+            padding: 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">高雪梅的平安夜圣诞树 🎄</div>
+    <div class="blessing">
+        高雪梅，平安夜的星光温柔洒落～<br>
+        愿你被温暖环绕，被幸运眷顾<br>
+        无灾无难，岁岁平安<br>
+        夜夜有好梦，日日有欢喜✨
+    </div>
+    <script>
+        // 初始化核心组件
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 粒子圣诞树核心配置
+        const particleCount = 12000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+
+        // 生成圣诞树形状粒子
+        for (let i = 0; i < particleCount; i++) {
+            const t = Math.random();
+            const theta = Math.acos(1 - 2 * t);
+            const phi = 2 * Math.PI * Math.random();
+            const radius = 1.8 * Math.sqrt(t) * (0.7 + Math.random() * 0.3);
+            const height = 4 * (t - 0.5);
+
+            // 位置赋值
+            positions[i * 3] = radius * Math.sin(theta) * Math.cos(phi);
+            positions[i * 3 + 1] = height;
+            positions[i * 3 + 2] = radius * Math.sin(theta) * Math.sin(phi);
+
+            // 渐变颜色（绿-金-红）
+            const colorType = Math.random();
+            if (colorType < 0.6) {
+                colors[i * 3] = 0.2 + 0.3 * Math.random();
+                colors[i * 3 + 1] = 0.7 + 0.2 * Math.random();
+                colors[i * 3 + 2] = 0.3 + 0.2 * Math.random();
+            } else if (colorType < 0.9) {
+                colors[i * 3] = 0.9 + 0.1 * Math.random();
+                colors[i * 3 + 1] = 0.7 + 0.2 * Math.random();
+                colors[i * 3 + 2] = 0.1 + 0.1 * Math.random();
+            } else {
+                colors[i * 3] = 0.9 + 0.1 * Math.random();
+                colors[i * 3 + 1] = 0.2 + 0.1 * Math.random();
+                colors[i * 3 + 2] = 0.3 + 0.1 * Math.random();
+            }
+
+            // 粒子大小渐变
+            sizes[i] = 0.03 + 0.07 * Math.random() * (1 - Math.abs(height) / 2);
+        }
+
+        // 配置几何体属性
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+        // 粒子材质（带发光效果）
+        const material = new THREE.PointsMaterial({
+            vertexColors: true,
+            size: 0.05,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.9,
+            blending: THREE.AdditiveBlending
+        });
+
+        // 添加到场景并设置动画
+        const tree = new THREE.Points(geometry, material);
+        scene.add(tree);
+        camera.position.z = 6;
+
+        // 交互控制（手机可拖动旋转）
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 4;
+        controls.maxDistance = 8;
+
+        // 旋转动画
+        function animate() {
+            requestAnimationFrame(animate);
+            tree.rotation.y += 0.002;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 适配手机屏幕
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
